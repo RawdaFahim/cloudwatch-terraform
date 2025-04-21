@@ -1,0 +1,5 @@
+datadog_api_key = "test"
+datadog_app_key = "test"
+aws_account_id  = "test"
+public_key = "ssh-ed25519 /sCrS rawdayousef@MacBookPro"
+datadog_external_id = "test"

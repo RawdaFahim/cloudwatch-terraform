@@ -1,0 +1,78 @@
+terraform {
+  required_providers {
+    datadog = {
+      source  = "datadog/datadog"
+      version = "~> 3.0"  # or whatever version you want
+    }
+  }
+}
+
+provider "aws" {
+  profile = var.aws_profile
+  region  = var.aws_region
+}
+
+provider "datadog" {
+  api_key = var.datadog_api_key
+  app_key = var.datadog_app_key
+}
+
+
+
+resource "aws_iam_role" "datadog_integration" {
+  name = "datadog-cloudwatch-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          AWS = "arn:aws:iam::464622532012:root" # Datadog's AWS account
+        },
+        Action = "sts:AssumeRole",
+        Condition = {
+          StringEquals = {
+            "sts:ExternalId" = var.datadog_external_id # This will be added after obtaining from Datadog
+          }
+        }
+      }
+    ]
+  })
+}
+## IAM policy
+data "aws_iam_policy_document" "datadog_policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "cloudwatch:GetMetricData",
+      "cloudwatch:GetMetricStatistics",
+      "cloudwatch:DescribeAlarms",
+      "cloudwatch:ListMetrics",
+      "logs:DescribeLogGroups",
+      "logs:GetLogEvents",
+      "logs:DescribeLogStreams",
+      "logs:FilterLogEvents"
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role_policy" "datadog_policy_attach" {
+  name   = "datadog-cloudwatch-policy"
+  role   = aws_iam_role.datadog_integration.name
+  policy = data.aws_iam_policy_document.datadog_policy.json
+}
+
+## additional policies:
+# Attach AWS's ReadOnlyAccess policy (covers most services)
+resource "aws_iam_role_policy_attachment" "datadog_readonly_access" {
+  role       = aws_iam_role.datadog_integration.name
+  policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+}
+
+# Attach AWS's CloudWatchReadOnlyAccess policy (covers missing CloudWatch perms)
+resource "aws_iam_role_policy_attachment" "datadog_cloudwatch_readonly" {
+  role       = aws_iam_role.datadog_integration.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchReadOnlyAccess"
+}
