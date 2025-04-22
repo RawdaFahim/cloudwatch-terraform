@@ -18,10 +18,10 @@ module "aws_infra" {
   public_key        = var.public_key
 }
 # main.tf in the root module
-output "ec2_cloudwatch_role_arn" {
-  value = module.aws_infra.ec2_cloudwatch_role_arn
-  description = "The ARN of the IAM role for CloudWatch integration"
-}
+# output "ec2_cloudwatch_role_arn" {
+#   value = module.aws_infra.ec2_cloudwatch_role_arn
+#   description = "The ARN of the IAM role for CloudWatch integration"
+# }
 
 # Call the aws-roles module to create IAM roles for Datadog integration
 module "aws-roles" {

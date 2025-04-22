@@ -56,7 +56,7 @@ This Terraform configuration uses two modules to set up the infrastructure. Foll
 This module sets up the EC2 instance, IAM roles, and networking resources necessary for CloudWatch integration.
 
 **Important:** Complete the Datadog integration in the Datadog console after the first module runs.  
-You'll need the **Role ARN** from the output of the first module and the **external ID** configured during setup in Datadog.
+You'll need the **Role NAME** of the role used in the `aws-roles module`  and the **external ID** configured during setup in Datadog.
 
 Run the following:
 
